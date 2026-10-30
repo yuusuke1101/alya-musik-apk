@@ -12,6 +12,7 @@ import java.net.URL;
 
 import fi.iki.elonen.NanoHTTPD;
 
+// Server mini di dalam aplikasi (pengganti server.js). Hanya bisa diakses dari HP ini (127.0.0.1).
 public class AlyaServer extends NanoHTTPD {
     private static AlyaServer inst;
     private static int port = -1;
@@ -43,7 +44,7 @@ public class AlyaServer extends NanoHTTPD {
         try {
             if (uri.equals("/")) return asset("index.html", "text/html; charset=utf-8");
             if (uri.startsWith("/player/")) return asset("player.html", "text/html; charset=utf-8");
-            if (uri.equals("/icon-192.png")) return asset("icon-192.png", "image/png");
+            if (uri.equals("/icon-192.png") || uri.equals("/mascot.png")) return asset(uri.substring(1), "image/png");
             if (uri.equals("/api/search")) {
                 String q = s.getParms().get("q");
                 return json(Backend.search(q == null ? "" : q.trim()).toString());
@@ -88,6 +89,7 @@ public class AlyaServer extends NanoHTTPD {
         return r;
     }
 
+    // Teruskan audio dari YouTube ke pemutar sambil mengalir (mendukung Range / seek)
     private Response audio(String id, String range) throws Exception {
         for (int attempt = 0; attempt < 2; attempt++) {
             Backend.Track t = Backend.track(id);

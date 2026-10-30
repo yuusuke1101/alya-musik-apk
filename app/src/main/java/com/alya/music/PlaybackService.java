@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
+// Menjaga aplikasi tetap hidup saat layar mati. CPU hanya ditahan saat lagu sedang diputar.
 public class PlaybackService extends Service {
     private PowerManager.WakeLock wl;
 
