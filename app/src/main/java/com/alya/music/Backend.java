@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// Pengganti server.js: pencarian, info lagu, alamat audio (NewPipeExtractor), dan lirik (lrclib).
 final class Backend {
     static final String FF = "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0";
     static final String ANDROID_UA = "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip";
@@ -60,7 +59,6 @@ final class Backend {
         return FF;
     }
 
-    // ---------- pencarian ----------
     static JSONArray search(String q) throws Exception {
         init();
         StreamingService yt = ServiceList.YouTube;
@@ -87,7 +85,6 @@ final class Backend {
         return out;
     }
 
-    // ---------- info + alamat audio ----------
     static Track track(String id) throws Exception {
         Track t = cache.get(id);
         if (t != null && t.exp > System.currentTimeMillis()) return t;
@@ -127,7 +124,6 @@ final class Backend {
         return o;
     }
 
-    // ---------- lirik ----------
     static JSONArray lyrics(String title, String channel, long sec) {
         JSONArray out = new JSONArray();
         try {
@@ -188,7 +184,6 @@ final class Backend {
         } catch (Exception e) { return null; }
     }
 
-    // ---------- util ----------
     static byte[] bytes(String url, String ua) {
         try {
             HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
@@ -233,7 +228,6 @@ final class Backend {
                 .trim();
     }
 
-    // ---------- pengunduh untuk NewPipeExtractor ----------
     static final class Dl extends Downloader {
         @Override
         public Response execute(Request req) throws IOException, ReCaptchaException {
