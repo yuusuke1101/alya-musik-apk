@@ -1,0 +1,41 @@
+CARA MEMBUAT APK ALYA MUSIC (tanpa Android Studio, tanpa install apa pun)
+=========================================================================
+
+APK ini adalah "cangkang": menampilkan web Alya Music layar penuh, dengan
+ - kolom alamat server di dalam aplikasi (alamat tunnel berubah? cukup ketik ulang),
+ - layanan latar belakang + notifikasi supaya musik tetap jalan saat layar mati.
+Server (server.js) tetap harus hidup di PC/VPS kamu.
+
+A. BUAT APK DI GITHUB (gratis, sekali saja)
+  1. Daftar di github.com, lalu buat repository baru (boleh Private), misal "alya-music-apk".
+  2. Di halaman repository klik "uploading an existing file".
+  3. Buka folder ini di komputer, pilih SEMUA isinya (termasuk folder ".github",
+     "app", dan file settings.gradle, build.gradle, gradle.properties),
+     lalu seret ke halaman GitHub. Klik "Commit changes".
+     Kalau folder ".github" tidak ikut terunggah: klik Add file > Create new file,
+     ketik nama  .github/workflows/build.yml  lalu tempel isi file build.yml dari folder ini.
+  4. Buka tab "Actions". Workflow "Build APK" jalan otomatis (atau klik Run workflow).
+  5. Tunggu sekitar 3-6 menit sampai ada centang hijau.
+  6. Klik run tersebut, turun ke bagian "Artifacts", unduh "AlyaMusic-apk" (file zip).
+  7. Ekstrak zip-nya: di dalamnya ada  app-debug.apk.
+
+B. PASANG DI HP
+  1. Kirim app-debug.apk ke HP, buka, izinkan "Pasang dari sumber tidak dikenal".
+  2. Kalau Play Protect memperingatkan, pilih "Tetap pasang" (ini APK buatanmu sendiri).
+  3. Izinkan notifikasi saat diminta (dipakai agar musik tetap jalan di latar belakang).
+  4. Buka aplikasinya, ketik alamat server, lalu Simpan.
+     Contoh: https://xxxx.trycloudflare.com  atau  http://192.168.1.5:3000
+
+C. MENGGANTI ALAMAT SERVER
+  Di halaman utama aplikasi ada tombol kecil "Alamat server" (muncul hanya di aplikasi).
+  Kalau server tidak terjangkau, muncul layar "Tidak bisa terhubung" dengan tombol Ganti alamat.
+
+D. KALAU PROSES DI GITHUB GAGAL (tanda silang merah)
+  Buka run-nya, klik langkah "Build debug APK", salin pesan error di bagian bawah,
+  lalu kirim ke Claude untuk diperbaiki.
+
+CATATAN
+  - Proyek ini belum pernah dicoba dibangun oleh pembuatnya, jadi error pertama mungkin muncul.
+  - Wajib server yang hidup + web-nya sudah versi terbaru (index.html dengan tombol "Alamat server").
+  - Di aplikasi, "Audio murni" otomatis menyala (tanpa efek) agar suara stabil saat layar mati.
+  - Kalau HP menghemat baterai terlalu agresif, ubah penghemat baterai aplikasi ini jadi "Tanpa batasan".
