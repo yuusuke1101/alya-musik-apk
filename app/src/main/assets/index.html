@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a12">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Alya Music</title>
+<style>
+  :root { --bg:#0a0a12; --card:rgba(255,255,255,.06); --line:rgba(255,255,255,.1); --ink:#f5f5fb; --muted:rgba(245,245,251,.62); --a:#8b5cf6; --b:#22d3ee; --sb:env(safe-area-inset-bottom,0px); }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html { -webkit-text-size-adjust:100%; }
+  body { background:radial-gradient(800px 420px at 0% -10%, rgba(139,92,246,.25), transparent), radial-gradient(700px 420px at 100% 0%, rgba(34,211,238,.14), transparent), var(--bg); background-attachment:fixed; color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; }
+  button { font:inherit; color:inherit; }
+  .page { max-width:1080px; margin:0 auto; padding:max(16px,env(safe-area-inset-top)) 14px calc(96px + var(--sb)); }
+  header h1 { font-size:24px; letter-spacing:-.02em; }
+  header p { color:var(--muted); font-size:13px; margin:4px 0 6px; }
+  .top { position:sticky; top:0; z-index:5; padding:10px 0 12px; background:linear-gradient(var(--bg) 78%, transparent); }
+  .search { display:flex; gap:8px; }
+  .search input { flex:1; min-width:0; padding:14px 16px; border-radius:14px; border:1px solid var(--line); background:#14141f; color:var(--ink); font-size:16px; }
+  .search input:focus { outline:2px solid var(--b); outline-offset:1px; }
+  .search button { padding:0 20px; border:none; border-radius:14px; background:linear-gradient(135deg,var(--a),var(--b)); color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
+  h2 { font-size:13px; font-weight:600; color:var(--muted); margin:6px 0 10px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .tools { display:flex; gap:12px; align-items:center; }
+  .tools button { background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; padding:6px 0; }
+  .auto { display:flex; align-items:center; gap:7px; font-size:12px; cursor:pointer; }
+  .auto input { accent-color:var(--a); width:16px; height:16px; }
+  .list { display:flex; flex-direction:column; gap:8px; }
+  .item { display:flex; gap:12px; align-items:center; padding:8px; border-radius:14px; background:var(--card); border:1px solid var(--line); cursor:pointer; text-align:left; width:100%; min-height:68px; }
+  .item:hover, .item.on { border-color:var(--b); }
+  .item.on .t { color:var(--b); }
+  .item img { width:92px; height:52px; border-radius:9px; object-fit:cover; flex:none; background:#1a1a26; }
+  .item .t { font-size:14px; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .item .s { font-size:12px; color:var(--muted); margin-top:3px; }
+  .msg { color:var(--muted); font-size:13px; padding:20px 4px; }
+  .spin { width:34px; height:34px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--b); animation:r 1s linear infinite; margin:0 auto 12px; }
+  @keyframes r { to { transform:rotate(360deg); } }
+
+  /* ---- HP: pemutar jadi lembar penuh + mini player ---- */
+  .stage { position:fixed; inset:0; z-index:30; background:var(--bg); display:flex; flex-direction:column; transform:translateY(105%); visibility:hidden; transition:transform .3s ease, visibility 0s .3s; }
+  body.sheet .stage { transform:none; visibility:visible; transition:transform .3s ease; }
+  .sheet-head { flex:none; padding:max(8px,env(safe-area-inset-top)) 10px 4px; display:flex; align-items:center; }
+  .sheet-head button { display:flex; align-items:center; gap:8px; background:none; border:none; font-size:14px; font-weight:600; padding:10px 8px; cursor:pointer; }
+  .fwrap { position:relative; flex:1; min-height:0; }
+  .stage iframe { width:100%; height:100%; border:0; background:transparent; display:block; }
+  .ph { position:absolute; inset:0; display:grid; place-items:center; text-align:center; padding:30px; color:var(--muted); font-size:14px; line-height:1.6; }
+  .ph.hide { display:none; }
+  .mini { position:fixed; left:8px; right:8px; bottom:calc(8px + var(--sb)); z-index:20; display:flex; align-items:center; gap:4px; padding:8px; border-radius:18px; background:rgba(24,24,38,.94); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.5); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .mini[hidden] { display:none; }
+  .mini .open { flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:none; border:none; text-align:left; cursor:pointer; }
+  .mini img { width:44px; height:44px; border-radius:10px; object-fit:cover; flex:none; background:#1a1a26; }
+  .mini .mt { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mini .ma { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mini .ib { width:44px; height:44px; border-radius:12px; border:none; background:none; display:grid; place-items:center; cursor:pointer; flex:none; }
+  .mini .ib.main { background:linear-gradient(135deg,var(--a),var(--b)); color:#fff; }
+  .mini .ib:active { transform:scale(.92); }
+
+  /* ---- PC / layar lebar ---- */
+  @media (min-width:900px) {
+    .page { padding-bottom:40px; }
+    .cols { display:grid; grid-template-columns:1fr 410px; gap:24px; align-items:start; }
+    .stage { position:sticky; inset:auto; top:16px; z-index:auto; transform:none; visibility:visible; transition:none; height:min(800px, calc(100vh - 32px)); border-radius:30px; border:1px solid var(--line); overflow:hidden; background:rgba(0,0,0,.25); }
+    .sheet-head, .mini { display:none !important; }
+  }
+  @media (prefers-reduced-motion:reduce) { .stage, .spin { transition:none; animation:none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Alya Music</h1>
+    <p>Cari lagu, putar, dan atur efek suaranya sendiri.</p>
+  </header>
+  <div class="top">
+    <form class="search" id="form">
+      <input id="q" type="search" enterkeyhint="search" placeholder="Judul lagu atau artis" autocomplete="off">
+      <button type="submit">Cari</button>
+    </form>
+  </div>
+
+  <div class="cols">
+    <main>
+      <h2>
+        <span id="label">Terakhir diputar</span>
+        <span class="tools">
+          <label class="auto"><input type="checkbox" id="auto" checked><span>Putar otomatis</span></label>
+          <button id="srv" type="button" hidden>Alamat server</button>
+          <button id="clear" type="button" hidden>Hapus riwayat</button>
+        </span>
+      </h2>
+      <div class="list" id="list"></div>
+    </main>
+
+    <aside class="stage" id="stage">
+      <div class="sheet-head">
+        <button id="close" type="button" aria-label="Tutup pemutar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Sedang diputar
+        </button>
+      </div>
+      <div class="fwrap">
+        <iframe id="frame" title="Pemutar" allow="autoplay" hidden></iframe>
+        <div class="ph" id="ph">Pilih lagu dari daftar<br>untuk mulai memutar.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="mini" id="mini" hidden>
+  <button class="open" id="m-open" type="button" aria-label="Buka pemutar">
+    <img id="m-img" alt=""><span style="min-width:0"><div class="mt" id="m-t"></div><div class="ma" id="m-a"></div></span>
+  </button>
+  <button class="ib" id="m-prev" type="button" aria-label="Lagu sebelumnya"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM9.5 12L18 18V6z"/></svg></button>
+  <button class="ib main" id="m-play" type="button" aria-label="Putar atau jeda">
+    <svg id="m-ic-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    <svg id="m-ic-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+  </button>
+  <button class="ib" id="m-next" type="button" aria-label="Lagu berikutnya"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var list = $('list'), label = $('label'), frame = $('frame'), ph = $('ph'), clearBtn = $('clear'), autoBox = $('auto');
+  var shown = [], queue = [], qi = -1, fstate = 0, errStreak = 0, playing = false;
+  var SPIN = '<div><div class="spin"></div>Menyiapkan lagu...</div>';
+
+  try { autoBox.checked = localStorage.getItem('alya_auto') !== '0'; } catch (e) {}
+  autoBox.addEventListener('change', function () { try { localStorage.setItem('alya_auto', autoBox.checked ? '1' : '0'); } catch (e) {} });
+
+  function getRecent() { try { return JSON.parse(localStorage.getItem('alya_recent') || '[]'); } catch (e) { return []; } }
+  function saveRecent(item) {
+    try {
+      var r = getRecent().filter(function (x) { return x.id !== item.id; });
+      r.unshift(item);
+      localStorage.setItem('alya_recent', JSON.stringify(r.slice(0, 12)));
+    } catch (e) {}
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
+  function thumbOf(it) { return it.thumb || ('https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg'); }
+
+  function render(items, emptyText) {
+    shown = items;
+    list.innerHTML = '';
+    if (!items.length) { list.appendChild(el('div', 'msg', emptyText)); return; }
+    items.forEach(function (it, i) {
+      var b = el('button', 'item'); b.type = 'button'; b.setAttribute('data-id', it.id);
+      var img = el('img'); img.src = thumbOf(it); img.alt = ''; img.loading = 'lazy';
+      var box = el('div');
+      box.appendChild(el('div', 't', it.title));
+      box.appendChild(el('div', 's', (it.author || '') + (it.duration ? ' • ' + it.duration : '')));
+      b.appendChild(img); b.appendChild(box);
+      b.addEventListener('click', function () { queue = shown.slice(); go(i); });
+      list.appendChild(b);
+    });
+    mark();
+  }
+  function mark() {
+    var cur = queue[qi] ? queue[qi].id : '';
+    for (var i = 0; i < list.children.length; i++) {
+      var n = list.children[i];
+      if (n.getAttribute('data-id') === cur) n.classList.add('on'); else n.classList.remove('on');
+    }
+  }
+  function showRecent() {
+    var r = getRecent();
+    label.textContent = 'Terakhir diputar';
+    clearBtn.hidden = !r.length;
+    render(r, 'Belum ada riwayat. Cari lagu di atas untuk mulai.');
+  }
+
+  // ----- pemutaran -----
+  function go(i) {
+    if (i < 0 || i >= queue.length) return false;
+    qi = i;
+    var it = queue[i];
+    saveRecent(it);
+    mark();
+    updateMini(it);
+    document.title = it.title + ' - Alya Music';
+    if (fstate === 2) {
+      frame.contentWindow.postMessage({ type: 'alya-load', id: it.id, auto: true }, location.origin);
+    } else {
+      fstate = 1;
+      ph.className = 'ph'; ph.innerHTML = SPIN; frame.hidden = true;
+      frame.src = '/player/' + encodeURIComponent(it.id) + '?auto=1';
+    }
+    return true;
+  }
+  function move(dir) { return go(qi + dir); }
+  frame.addEventListener('load', function () { ph.className = 'ph hide'; frame.hidden = false; });
+
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin || e.source !== frame.contentWindow) return;
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'alya-hello') { fstate = 2; }
+    else if (d.type === 'alya-state') {
+      playing = !!d.playing; if (playing) errStreak = 0; setPlayIcon();
+      try { if (window.AlyaApp && AlyaApp.setPlaying) AlyaApp.setPlaying(playing); } catch (e) {}
+    }
+    else if (d.type === 'alya-ended') { if (autoBox.checked) move(1); }
+    else if (d.type === 'alya-nav') { move(d.dir < 0 ? -1 : 1); }
+    else if (d.type === 'alya-near') {
+      var n = queue[qi + 1];
+      if (n && autoBox.checked) fetch('/api/prefetch/' + encodeURIComponent(n.id)).catch(function () {});
+    }
+    else if (d.type === 'alya-blocked') { openSheet(); }
+    else if (d.type === 'alya-error') {
+      errStreak++;
+      if (autoBox.checked && errStreak < 3) setTimeout(function () { move(1); }, 1500);
+    }
+  });
+
+  // ----- mini player + lembar penuh (HP) -----
+  function updateMini(it) {
+    $('mini').hidden = false;
+    $('m-img').src = thumbOf(it);
+    $('m-t').textContent = it.title;
+    $('m-a').textContent = it.author || '';
+  }
+  function setPlayIcon() {
+    $('m-ic-play').style.display = playing ? 'none' : 'block';
+    $('m-ic-pause').style.display = playing ? 'block' : 'none';
+  }
+  function openSheet() {
+    if (document.body.classList.contains('sheet')) return;
+    document.body.classList.add('sheet');
+    try { history.pushState({ sheet: 1 }, ''); } catch (e) {}
+  }
+  function closeSheet() {
+    if (!document.body.classList.contains('sheet')) return;
+    if (history.state && history.state.sheet) history.back(); else document.body.classList.remove('sheet');
+  }
+  window.addEventListener('popstate', function () { document.body.classList.remove('sheet'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+  $('m-open').addEventListener('click', openSheet);
+  $('close').addEventListener('click', closeSheet);
+  $('m-prev').addEventListener('click', function () { move(-1); });
+  $('m-next').addEventListener('click', function () { move(1); });
+  $('m-play').addEventListener('click', function () {
+    if (fstate === 2) frame.contentWindow.postMessage({ type: 'alya-cmd', cmd: 'toggle' }, location.origin);
+    else openSheet();
+  });
+
+  // ----- cari -----
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = $('q').value.trim();
+    if (!q) { showRecent(); return; }
+    $('q').blur();
+    label.textContent = 'Hasil untuk "' + q + '"';
+    clearBtn.hidden = true;
+    list.innerHTML = '';
+    list.appendChild(el('div', 'msg', 'Mencari...'));
+    fetch('/api/search?q=' + encodeURIComponent(q))
+      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function (d) { render(d, 'Lagu tidak ditemukan. Coba kata kunci lain.'); })
+      .catch(function () { render([], 'Pencarian gagal. Periksa koneksi lalu coba lagi.'); });
+  });
+  clearBtn.addEventListener('click', function () { try { localStorage.removeItem('alya_recent'); } catch (e) {} showRecent(); });
+  showRecent();
+  if (window.AlyaApp && typeof AlyaApp.changeServer === 'function') { $('srv').hidden = false; $('srv').addEventListener('click', function () { AlyaApp.changeServer(); }); }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
+})();
+</script>
+</body>
+</html>
