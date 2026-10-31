@@ -1115,6 +1115,8 @@
     var imgs = document.querySelectorAll('.bg, .disc img');
     for (var q2 = 0; q2 < imgs.length; q2++) imgs[q2].src = m.imageSrc || BLANK;
     setLyrics(m.lyrics);
+    if (m.lyricsKind === 'plain') $('i-ly').textContent = 'Perkiraan (tidak tersinkron)';
+    else if (m.lyricsKind === 'caption') $('i-ly').textContent = LY.length + ' baris dari subtitle YouTube';
     fill.style.width = '0%'; dot.style.left = '0%'; cur.textContent = '0:00'; dur.textContent = '0:00';
     nearSent = false;
     AUTO = !!auto;
@@ -1135,7 +1137,12 @@
     var d = e.data;
     if (!d || typeof d !== 'object') return;
     if (d.type === 'alya-load' && typeof d.id === 'string' && d.id.length === 11 && /^[A-Za-z0-9_-]+$/.test(d.id)) fetchTrack(d.id, !!d.auto);
-    else if (d.type === 'alya-cmd' && d.cmd === 'toggle') { if (playing) pause(); else startAt(null, true); }
+    else if (d.type === 'alya-cmd') {
+      if (d.cmd === 'toggle') { if (playing) pause(); else startAt(null, true); }
+      else if (d.cmd === 'play') { if (!playing) startAt(null, true); }
+      else if (d.cmd === 'pause') pause();
+      else if (d.cmd === 'seek') seekTo((Number(d.ms) || 0) / 1000);
+    }
   });
   window.addEventListener('resize', function() { fitLy(); lyActive = -2; updLyrics(pos(), true); });
   (function mediaActions() {
@@ -1151,6 +1158,8 @@
     } catch (e) {}
   })();
   setMedia({ title: $('t-title').textContent, artist: $('i-artist').textContent, imageSrc: document.querySelector('.disc img').src });
+  function reportPos() { post({ type: 'alya-pos', pos: au.currentTime || 0, dur: D(), rate: rate, playing: playing }); }
+  ['loadedmetadata', 'play', 'pause', 'seeked', 'ratechange'].forEach(function(ev) { au.addEventListener(ev, reportPos); });
   post({ type: 'alya-hello' });
   refreshFxInfo();
   setIcons();
