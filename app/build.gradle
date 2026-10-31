@@ -1,11 +1,14 @@
 plugins {
     id 'com.android.application'
 }
+def githubRunNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "1"
+def autoVersionCode = githubRunNumber.toInteger()
+def autoVersionName = "v" + githubRunNumber
+
 android {
     namespace 'com.alya.music'
     compileSdk 34
     
-    // 1. Tambahkan baris ini untuk mengaktifkan pembuatan kelas BuildConfig
     buildFeatures {
         buildConfig = true
     }
@@ -14,21 +17,26 @@ android {
         applicationId 'com.alya.music'
         minSdk 24
         targetSdk 34
-        versionCode 3
-        versionName '38'
+        
+        versionCode autoVersionCode
+        versionName autoVersionName
+        
         buildConfigField "String", "REPO", "\"yuusuke1101/alya-musik-apk\""
     }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
         coreLibraryDesugaringEnabled true
     }
+    
     packaging {
         resources {
             excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE*', 'META-INF/NOTICE*', 'META-INF/INDEX.LIST', 'META-INF/*.kotlin_module']
         }
     }
 }
+
 dependencies {
     implementation 'com.github.TeamNewPipe:NewPipeExtractor:v0.26.3'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
