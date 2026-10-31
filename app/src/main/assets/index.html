@@ -650,8 +650,7 @@ function btn(c, text, fn, cls) { const b = h('button', cls || 'sbtn', text); b.t
 function rMe(m) {
   m.appendChild(h('h1', '', 'Saya'));
   const u = box(m, 'Pembaruan');
-  line(u, 'Versi terpasang: ' + (updInfo ? updInfo.currentName : '-'));
-  line(u, !updInfo || !updInfo.enabled ? 'Pemeriksaan update aktif untuk aplikasi yang dibangun lewat GitHub.' : updInfo.error ? 'Tidak bisa memeriksa update (repository harus publik).' : updInfo.available ? 'Tersedia ' + updInfo.latestName : 'Sudah versi terbaru.');
+  line(u, !updInfo || !updInfo.enabled ? 'Pemeriksaan update aktif untuk aplikasi yang dibangun lewat GitHub.' : updInfo.error ? 'Tidak bisa memeriksa update.' : updInfo.available ? 'Update baru (' + updInfo.latestName + ') tersedia!' : 'Aplikasi sudah up-to-date.');
   const ua = h('div', 'acts'); u.appendChild(ua);
   btn(ua, 'Periksa sekarang', () => { checkUpdate(true).then(d => toast(!d ? 'Tidak bisa memeriksa' : d.available ? 'Update tersedia' : 'Sudah terbaru')); });
   if (updInfo && updInfo.available) btn(ua, 'Unduh ' + updInfo.latestName, () => openExt(updInfo.url), 'pbtn');
