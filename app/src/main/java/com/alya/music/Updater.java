@@ -30,10 +30,7 @@ final class Updater {
             o.put("current", pi.versionCode);
             o.put("currentName", pi.versionName == null ? "" : pi.versionName);
             o.put("available", false);
-            
-            // Nama repository disesuaikan dengan URL GitHub yang Anda berikan
-            String repo = "yuusuke1101/alya-musik-apk"; 
-            
+            String repo = BuildConfig.REPO;
             o.put("enabled", !repo.isEmpty());
             if (!repo.isEmpty()) {
                 byte[] b = Backend.bytes("https://api.github.com/repos/" + repo + "/releases/latest", "AlyaMusicApp");
