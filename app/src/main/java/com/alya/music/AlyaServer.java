@@ -17,6 +17,7 @@ public class AlyaServer extends NanoHTTPD {
     private static AlyaServer inst;
     private static int port = -1;
     private final AssetManager am;
+    private final Context context;
 
     static synchronized int ensure(Context c) {
         if (inst != null && inst.isAlive()) return port;
@@ -34,6 +35,7 @@ public class AlyaServer extends NanoHTTPD {
 
     private AlyaServer(Context c, int p) {
         super("127.0.0.1", p);
+        context = c;
         am = c.getAssets();
     }
 
@@ -45,6 +47,14 @@ public class AlyaServer extends NanoHTTPD {
             if (uri.equals("/")) return asset("index.html", "text/html; charset=utf-8");
             if (uri.startsWith("/player/")) return asset("player.html", "text/html; charset=utf-8");
             if (uri.equals("/icon-192.png") || uri.equals("/mascot.png")) return asset(uri.substring(1), "image/png");
+            
+            // Rute API Update baru
+            if ("/api/update".equals(uri)) {
+                boolean force = "1".equals(s.getParms().get("force"));
+                JSONObject res = Updater.check(context, force);
+                return json(res.toString());
+            }
+            
             if (uri.equals("/api/search")) {
                 String q = s.getParms().get("q");
                 return json(Backend.search(q == null ? "" : q.trim()).toString());
