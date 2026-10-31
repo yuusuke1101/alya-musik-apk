@@ -2,15 +2,11 @@ package com.alya.music;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -20,16 +16,8 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static WebView sWeb;
     private WebView web;
-
-    // Dipakai notifikasi/layar kunci untuk mengirim perintah (play, pause, next, prev, seek) ke pemutar di dalam WebView.
-    static void send(final String cmd) {
-        new Handler(Looper.getMainLooper()).post(() -> {
-            WebView w = sWeb;
-            if (w != null) w.evaluateJavascript("window.alyaCmd&&window.alyaCmd('" + cmd + "')", null);
-        });
-    }
+    private int port;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -38,7 +26,6 @@ public class MainActivity extends Activity {
         getWindow().setNavigationBarColor(Color.parseColor("#0a0a12"));
 
         web = new WebView(this);
-        sWeb = web;
         web.setBackgroundColor(Color.parseColor("#0a0a12"));
         setContentView(web);
 
@@ -74,50 +61,22 @@ public class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
         } catch (Exception e) { }
 
-        int port = AlyaServer.ensure(this);
-        if (port < 0) Toast.makeText(this, "Server internal gagal dimulai", Toast.LENGTH_LONG).show();
-        else web.loadUrl("http://127.0.0.1:" + port + "/");
+        port = AlyaServer.ensure(this);
+        if (port < 0) {
+            Toast.makeText(this, "Server internal gagal dimulai", Toast.LENGTH_LONG).show();
+        } else {
+            web.loadUrl("http://127.0.0.1:" + port + "/");
+        }
     }
 
     class Bridge {
-        // Dipanggil pemutar: info lagu + status untuk notifikasi dan layar kunci
         @JavascriptInterface
-        public void setMedia(String title, String artist, String id, boolean playing, double dur, double pos, double rate) {
+        public void setPlaying(boolean p) {
             try {
                 Intent i = new Intent(MainActivity.this, PlaybackService.class);
-                i.setAction(PlaybackService.A_META);
-                i.putExtra("title", title);
-                i.putExtra("artist", artist);
-                i.putExtra("id", id);
-                i.putExtra("playing", playing);
-                i.putExtra("dur", (long) dur);
-                i.putExtra("pos", (long) pos);
-                i.putExtra("rate", (float) rate);
+                i.putExtra("play", p);
                 startService(i);
             } catch (Exception e) { }
-        }
-
-        @JavascriptInterface
-        public void share(final String text) {
-            runOnUiThread(() -> {
-                Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text);
-                startActivity(Intent.createChooser(i, "Bagikan"));
-            });
-        }
-
-        @JavascriptInterface
-        public void openUrl(final String url) {
-            if (url == null || !url.startsWith("http")) return;
-            runOnUiThread(() -> { try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); } catch (Exception e) { } });
-        }
-
-        @JavascriptInterface
-        public void copy(final String text) {
-            runOnUiThread(() -> {
-                ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                cm.setPrimaryClip(ClipData.newPlainText("Alya Music", text));
-                Toast.makeText(MainActivity.this, "Disalin", Toast.LENGTH_SHORT).show();
-            });
         }
     }
 
@@ -128,7 +87,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        sWeb = null;
         stopService(new Intent(this, PlaybackService.class));
         web.destroy();
         super.onDestroy();
