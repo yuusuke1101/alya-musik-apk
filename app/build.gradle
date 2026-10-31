@@ -4,12 +4,19 @@ plugins {
 android {
     namespace 'com.alya.music'
     compileSdk 34
+    
+    // 1. Tambahkan baris ini untuk mengaktifkan pembuatan kelas BuildConfig
+    buildFeatures {
+        buildConfig = true
+    }
+    
     defaultConfig {
         applicationId 'com.alya.music'
         minSdk 24
         targetSdk 34
         versionCode 3
-        versionName '2.1'
+        versionName '2.2'
+        buildConfigField "String", "REPO", "\"yuusuke1101/alya-musik-apk\""
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
